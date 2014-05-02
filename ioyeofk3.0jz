@@ -1,0 +1,134 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Diagnostics;
+using System.IO;
+using SFML.Graphics;
+
+namespace wakarimasen
+{
+    class Files
+    {
+        // Logging verbosity.
+        // 0 = off
+        // 1 = errors only
+        // 2 = errors, notables
+        // 3 = all
+        private const int LOG_DETAIL = 3;
+
+        //Dictionary<int, string> sprites = new Dictionary<int,string>()
+        private static SortedDictionary<int, Texture> sprites = new SortedDictionary<int, Texture>();
+
+        // Returns a boolean representing success or failure.
+        public static bool load(string filename)
+        {
+
+            // Check for a valid filename? Either by using a try-catch statement or testing conditions, e.g. one and only one period. 
+            
+            // For now, the lazy try-catch.
+            try
+            {
+                // Operate on file according to its extension.
+
+                switch (filename.Substring(filename.Length - 4, 4))
+                { 
+                    case ".png":
+                    case ".jpg":
+                    case "jpeg":
+                    case ".bmp":
+                        {
+                            // It's an image file.    
+                            
+                            // FIX: Can't add the key by total count of items. If some are lost or removed, shit will get retarded. 
+                            // Graphics are held as textures so they're stored in speedy graphics memory. 
+                            // Common scale figures could be generated at the same time to minimise effort later. 
+                            sprites.Add(1, Drawing.removeMask(new Image(filename)));
+
+                            //System.IO.
+                            
+                            log(2, "File loaded (" + filename + ").");
+                            return true;
+                        }
+                    default:
+                        {
+                            log(1, "Error: file format unsupported (" + filename + ").");
+
+                            return false;
+                        }
+                }
+            }
+            catch (Exception e)
+            {
+                log(1, "Error: file (" + filename + ") failed to load. " + e.ToString());
+
+                return false;
+            }
+            finally
+            {
+
+            }
+            
+        }
+
+        public static Texture getSprite(int ID)
+        {
+            return sprites[ID];
+        }
+
+        // Writes a line of text to the log file, prefixed with the current date and time.
+        public static void log(int detailLevel, string line)
+        {
+            // Store a copy in memory in case logging is disabled and a crash log needs, and is able, to be dumped. 
+            // Delete last log, possibly buffering a few as well.
+
+            // Add verbosity settings, separate ones for the log file and console / debug feed. 
+
+            System.DateTime time = new System.DateTime();
+            time = System.DateTime.Now;
+
+            TextWriter logWriter;
+
+            try
+            {
+                StreamReader logChecker = new StreamReader("log.txt");
+
+                logWriter = new StreamWriter("log_older.txt", false);
+
+                string previousLog = logChecker.ReadToEnd();
+                for (int i = 0; i < previousLog.Length; i++)
+                {
+                    logWriter.Write(previousLog.ElementAt(i));
+                }
+                logWriter.Close();
+
+                logChecker.Close();
+            }
+            catch (Exception e)
+            {
+
+                Console.WriteLine("no log already");
+            }
+
+            logWriter.WriteLine(time.ToString() + " :: " + line);
+            logWriter.Close();
+
+            switch(LOG_DETAIL)
+            {
+                case 1:
+
+                    // A copy for the debug feed.
+                    Debug.Print("[LOG] {0}", line);
+                    // A copy for the unofficial debug feed, the console.
+                    Console.WriteLine("[LOG] {0}", line);
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    break;
+            }
+            
+        }
+
+    }
+}

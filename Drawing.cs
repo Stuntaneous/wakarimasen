@@ -35,6 +35,11 @@ namespace wakarimasen
             // Video settings.
             window.SetFramerateLimit(FRAME_LIMIT);
             window.SetVerticalSyncEnabled(VSYNC);
+
+            Files.log(2, "Resolution is " + RESOLUTION_X + "x" + RESOLUTION_Y + ".");
+            Files.log(2, "Frame limit is " + FRAME_LIMIT + ".");
+            string vsyncLogText = VSYNC ? "ENABLED" : "DISABLED";
+            Files.log(2, "Vertical sync is " + vsyncLogText + ".");
         }
 
         public static void drawWindow()
@@ -47,27 +52,34 @@ namespace wakarimasen
 
             // Drawing!
             //window.Draw(new Sprite(Files., new IntRect(0, 0, 32, 32)), renderAlpha);
-            drawSprite(1, 4, (int)Character.getCharacter(0).position[0], (int)Character.getCharacter(0).position[1]);
             
+            //drawSprite(0, 4, (int)Character.getCharacter(0).position[0], (int)Character.getCharacter(0).position[1]);
+            
+            Text FPS = new Text(Program.FPS.ToString(), new Font("data\\misc\\Fipps-Regular.otf"), 18); // TODO: This font may not be free.
+            FPS.Position = new Vector2f(10, 15);
+            FPS.Color = new Color(255, 0, 50);
+            window.Draw(new Text(FPS));
+
+            // Draw all effect animations.
 
             // Update the window.
             window.Display();
         }
 
         // Integers x and y are coordinates in the window, not a position in the game world.
-        public static void drawSprite(int spriteID, float scale, int x, int y)
+        public static void drawSprite(int spriteID, float scale, int x, int y, int sourceX, int sourceY)
         {
             Texture loaded = Files.getSprite(spriteID);
-            Sprite sprite = new Sprite(loaded, new IntRect(0, 0, 32, 32));
+            Sprite sprite = new Sprite(loaded, new IntRect(sourceX, sourceY, 32, 32));
             sprite.Scale = new Vector2f(scale, scale);
             sprite.Position = new Vector2f(x, y);
 
             window.Draw(sprite, renderAlpha);
         }
         // An overload that doesn't require a scale to be specified. 
-        public static void drawSprite(int spriteID, int x, int y)
+        public static void drawSprite(int spriteID, int x, int y, int sourceX, int sourceY)
         {
-            drawSprite(spriteID, 1, x, y);
+            drawSprite(spriteID, 1, x, y, sourceX, sourceY);
         }
 
         public static Texture removeMask(Image image)
